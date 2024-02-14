@@ -56,7 +56,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     shape: BoxShape.circle,
                     color: Colors.grey
                   ),
-                  child: image.isNotEmpty ? Image.network(image) : const SizedBox(),
+                  child: image.isNotEmpty ? Image.file(
+                    File(
+                      image,
+                    ),fit: BoxFit.cover,
+                  ) : const SizedBox(),
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height / 12),
                 GlobalTextField(
