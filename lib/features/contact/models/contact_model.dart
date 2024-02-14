@@ -3,16 +3,19 @@ class ContactModel {
   final String phone;
   final String contactId;
   final int creationDate;
+  final String image;
 
   ContactModel(
       {required this.phone,
       required this.name,
+      required this.image,
       required this.contactId,
       required this.creationDate,});
 
   factory ContactModel.fromJson(Map<String, dynamic> json) => ContactModel(
       phone: json['phone'] as String? ?? '',
       name: json['name'] as String? ?? '',
+      image: json['image'] as String? ?? '',
       creationDate: json['creationDate'] as int? ?? 0,
       contactId: json['contactId'] as String? ?? '');
 
@@ -20,11 +23,13 @@ class ContactModel {
     String? name,
     String? phone,
     String? contactId,
+    String? image,
     int? creationDate,
   }) =>
       ContactModel(
           phone: phone ?? this.phone,
           name: name ?? this.name,
+          image: image ?? this.image,
           contactId: contactId ?? this.contactId,
           creationDate: creationDate ?? this.creationDate,
           );

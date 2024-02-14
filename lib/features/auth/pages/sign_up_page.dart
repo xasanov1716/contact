@@ -29,8 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   String email = '';
 
-  final ImagePicker picker = ImagePicker();
-  String image = '';
+
   String password = '';
 
   FocusNode focusNode = FocusNode();
@@ -49,19 +48,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             padding: const EdgeInsets.all(16),
             child: ListView(
               children: [
-                Container(
-                  height: 60,
-                  width: 60,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey
-                  ),
-                  child: image.isNotEmpty ? Image.file(
-                    File(
-                      image,
-                    ),fit: BoxFit.cover,
-                  ) : const SizedBox(),
-                ),
                 SizedBox(height: MediaQuery.of(context).size.height / 12),
                 GlobalTextField(
                   hintText: "Email",
@@ -84,10 +70,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     password = v;
                   },
                 ),
-                const SizedBox(height: 20),
-                TextButton(onPressed: (){
-                  showBottomSheetDialog();
-                }, child: Text('Select Image')),
                 const SizedBox(height: 20),
                 GlobalButton(
                     title: "Register",
@@ -132,104 +114,5 @@ class _RegisterScreenState extends State<RegisterScreen> {
           }
         }),
       );
-  }
-
-  Future<UniversalData> imageUploader(XFile xFile) async {
-    String downloadUrl = "";
-    try {
-      final storageRef = FirebaseStorage.instance.ref();
-      var imageRef = storageRef.child("images/${xFile.name}");
-      await imageRef.putFile(File(xFile.path));
-      downloadUrl = await imageRef.getDownloadURL();
-      debugPrint('STORAGE ISHLADI');
-      return UniversalData(data: downloadUrl);
-    } catch (error) {
-      debugPrint('STORAGE ISHLAMADI');
-      return UniversalData(error: error.toString());
-    }}
-
-
-
-
-  void showBottomSheetDialog() {
-    showModalBottomSheet(
-      backgroundColor: Colors.transparent,
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(24),
-          decoration: const BoxDecoration(
-            color: Color(0xFF674D3F),
-            borderRadius:  BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                onTap: () {
-                  _getFromGallery();
-                  Navigator.pop(context);
-                },
-                leading:  const Icon(Icons.photo,color: Colors.white,),
-                title:  const Text("Select from Gallery",style: TextStyle(color: Colors.white,fontSize: 16,fontFamily: 'Urbanist'),),
-              ),
-              ListTile(
-                onTap: () {
-                  _getFromCamera();
-                  Navigator.pop(context);
-                },
-                leading:  const Icon(Icons.camera_alt,color: Colors.white,),
-                title:  const Text("Select from Camera",style: TextStyle(color: Colors.white,fontSize: 16,fontFamily: 'Urbanist'),),
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _getFromGallery() async {
-    XFile? xFiles = await picker.pickImage(
-      maxHeight: 512,
-      maxWidth: 512,
-      source: ImageSource.gallery,
-    );
-    if (xFiles != null && context.mounted) {
-      showLoading(context: context);
-      UniversalData data = await imageUploader(xFiles);
-      image = data.data;
-      setState(() {
-
-      });
-      if (context.mounted) {
-        hideLoading(context: context);
-      }
-    } else if (context.mounted) {
-      hideLoading(context: context);
-    }
-  }
-
-  Future<void> _getFromCamera() async {
-    XFile? xFiles = await picker.pickImage(
-      maxHeight: 512,
-      maxWidth: 512,
-      source: ImageSource.camera,
-    );
-    if (xFiles != null && context.mounted) {
-      showLoading(context: context);
-      UniversalData data = await imageUploader(xFiles);
-      image = data.data;
-      setState(() {
-
-      });
-      if (context.mounted) {
-        hideLoading(context: context);
-      }
-    } else if (context.mounted) {
-      hideLoading(context: context);
-    }
   }
 }
