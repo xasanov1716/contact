@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1032637311902",
+    "project_id": "contact-2ebba",
+    "storage_bucket": "contact-2ebba.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1032637311902:android:4b276662ef1c102c16448f",
+        "android_client_info": {
+          "package_name": "com.realsoft.contact.uz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMbWKmkYPdauZPIz9K-FUy0KpTi5iUx6w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
