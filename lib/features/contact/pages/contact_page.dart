@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:contact/features/basket/bloc/basket_bloc.dart';
 import 'package:contact/features/basket/pages/basket_page.dart';
 import 'package:contact/features/contact/bloc/product_bloc.dart';
@@ -62,72 +63,100 @@ class _ContactPageState extends State<ContactPage> {
                       print('Successga tushdi');
                       return snapshot.data!.isNotEmpty
                           ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 ...List.generate(
                                     snapshot.data!.length,
                                     (index) => Slidable(
+                                          // The start action pane is the one at the left or the top side.
+                                          startActionPane: ActionPane(
+                                              // A motion is a widget used to control how the pane animates.
+                                              motion: const ScrollMotion(),
 
-                                      // The start action pane is the one at the left or the top side.
-                                      startActionPane: ActionPane(
-                                        // A motion is a widget used to control how the pane animates.
-                                        motion: const ScrollMotion(),
+                                              // A pane can dismiss the Slidable.
+                                              dismissible: DismissiblePane(
+                                                  onDismissed: () {}),
 
-                                        // A pane can dismiss the Slidable.
-                                        dismissible: DismissiblePane(onDismissed: () {}),
+                                              // All actions are defined in the children parameter.
+                                              children: []),
 
-                                        // All actions are defined in the children parameter.
-                                        children: []
-                                      ),
-
-                                      // The end action pane is the one at the right or the bottom side.
-                                      endActionPane:  ActionPane(
-                                        motion: ScrollMotion(),
-                                        children: [
-                                          SlidableAction(
-                                            flex: 1,
-                                            foregroundColor: Colors.green,
-                                            icon: Icons.call,
-                                            onPressed: (BuildContext context) {
-                                              callUser(snapshot.data![index].phone);
-                                            },
+                                          // The end action pane is the one at the right or the bottom side.
+                                          endActionPane: ActionPane(
+                                            motion: ScrollMotion(),
+                                            children: [
+                                              SlidableAction(
+                                                flex: 1,
+                                                foregroundColor: Colors.green,
+                                                icon: Icons.call,
+                                                onPressed:
+                                                    (BuildContext context) {
+                                                  callUser(snapshot
+                                                      .data![index].phone);
+                                                },
+                                              ),
+                                              SlidableAction(
+                                                flex: 1,
+                                                foregroundColor: Colors.red,
+                                                icon: Icons.delete,
+                                                onPressed:
+                                                    (BuildContext context) {
+                                                  context
+                                                      .read<BasketBloc>()
+                                                      .add(AddContactSqlEvent(
+                                                          contactModelSql: ContactModelSql(
+                                                            email: snapshot.data![index].email,
+                                                              image: snapshot
+                                                                  .data![index]
+                                                                  .image,
+                                                              name: snapshot
+                                                                  .data![index]
+                                                                  .name,
+                                                              phone: snapshot
+                                                                  .data![index]
+                                                                  .phone,
+                                                              creationDate:
+                                                                  DateTime.now()
+                                                                      .millisecondsSinceEpoch)));
+                                                  context
+                                                      .read<ContactBloc>()
+                                                      .add(
+                                                          DeleteContactByIdEvent(
+                                                              id: snapshot
+                                                                  .data![index]
+                                                                  .contactId));
+                                                },
+                                              ),
+                                              SlidableAction(
+                                                  flex: 1,
+                                                  foregroundColor: Colors.blue,
+                                                  icon: Icons.message,
+                                                  onPressed:
+                                                      (BuildContext context) {
+                                                    messageUser(snapshot
+                                                        .data![index].phone);
+                                                  }),
+                                            ],
                                           ),
-                                          SlidableAction(
-                                            flex: 1,
-                                            foregroundColor: Colors.red,
-                                            icon: Icons.delete,
-                                            onPressed: (BuildContext context) {
-                                              context.read<BasketBloc>().add(
-                                                  AddContactSqlEvent(
-                                                      contactModelSql: ContactModelSql(
-                                                          name: snapshot
-                                                              .data![index].name,
-                                                          phone: snapshot
-                                                              .data![index].phone,
-                                                          creationDate: DateTime
-                                                              .now()
-                                                              .millisecondsSinceEpoch)));
-                                              context.read<ContactBloc>().add(DeleteContactByIdEvent(id: snapshot.data![index].contactId));
-                                            },
+                                          child: ListTile(
+                                            trailing: Text(snapshot.data![index].email),
+                                            leading: ClipRRect(
+                                              borderRadius: const BorderRadius.only(topRight: Radius.circular(16),topLeft: Radius.circular(16),bottomRight: Radius.circular(16),bottomLeft: Radius.circular(16)),
+                                              child: CachedNetworkImage(
+                                                imageUrl: snapshot.data![index].image,
+                                                fit: BoxFit.fill,
+                                                errorWidget: (context, url, error) =>
+                                                const Icon(Icons.person),
+                                                placeholder: (context, url) =>
+                                                const Center(child: CupertinoActivityIndicator()),
+                                              ),
+                                            ),
+                                            title: Text(
+                                                snapshot.data![index].name),
+                                            subtitle: Text(
+                                                snapshot.data![index].phone),
                                           ),
-                                          SlidableAction(
-                                            flex: 1,
-                                            foregroundColor: Colors.blue,
-                                            icon: Icons.message,
-                                              onPressed: (BuildContext context){
-                                                messageUser(snapshot.data![index].phone);
-                                              }
-                                          ),
-                                        ],
-                                      ),
-                                      child: ListTile(
-                                        title:
-                                            Text(snapshot.data![index].name),
-                                        subtitle:
-                                            Text(snapshot.data![index].phone),
-                                      ),
-                                    )),
+                                        )),
                               ],
                             )
                           : const Center(child: Text('EMPTY'));
@@ -144,7 +173,6 @@ class _ContactPageState extends State<ContactPage> {
         ));
   }
 
-
   Future<void> messageUser(String number) async {
     await launchUrl(Uri.parse('sms:+998$number?body='));
   }
@@ -152,5 +180,4 @@ class _ContactPageState extends State<ContactPage> {
   Future<void> callUser(String number) async {
     await launchUrl(Uri.parse('tel:+998$number'));
   }
-
 }

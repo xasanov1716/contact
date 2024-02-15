@@ -26,9 +26,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
-      floatingActionButton: FloatingActionButton(child: const Icon(Icons.search),onPressed: (){
-        context.read<AuthBloc>().add(AuthGoogleSignInEvent());
-      },),
         appBar: AppBar(
           elevation: 0,
           title: const Text("Login Screen"),

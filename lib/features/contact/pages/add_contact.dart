@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:contact/common/loading_dialog.dart';
 import 'package:contact/features/contact/bloc/product_bloc.dart';
 import 'package:contact/features/contact/models/contact_model.dart';
+import 'package:contact/main.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,9 +25,10 @@ class _AddContactPageState extends State<AddContactPage> {
   String name = '';
   String phone = '';
 
-
   final ImagePicker picker = ImagePicker();
   String image = '';
+
+  String email = '';
 
   final FocusNode focusNode = FocusNode();
 
@@ -47,97 +50,163 @@ class _AddContactPageState extends State<AddContactPage> {
           }
           return Padding(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  image.isNotEmpty
+                      ? ClipRRect(
+                    borderRadius: const BorderRadius.only(topRight: Radius.circular(24),topLeft: Radius.circular(24),bottomRight: Radius.circular(24),bottomLeft: Radius.circular(24)),
+                        child: CachedNetworkImage(
+                            imageUrl: image,
+                            height: 100,
+                            width: 100,
+                            fit: BoxFit.fill,
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.person),
+                            placeholder: (context, url) =>
+                                const Center(child: CupertinoActivityIndicator()),
+                          ),
+                      )
+                      :  Container(
+                    height: 100,
+                    width: 100,
+                    decoration: const BoxDecoration(
+                      color: Colors.grey,
+                      shape: BoxShape.circle
+                    ),
                   ),
-                  child: image.isNotEmpty ? Image.network(
-                    image,fit: BoxFit.cover,
-                    height: 60,
-                    width: 60,
-                  ) : const SizedBox(),
-                ),
-                TextField(
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.text,
-                  decoration: InputDecoration(hintText: 'Enter Name',
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.grey, width: 1),
-                      borderRadius: BorderRadius.circular(10),
+                  const SizedBox(height: 16,),
+                  TextField(
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      hintText: 'Enter Email',
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.red, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.grey, width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.red, width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.grey, width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-
-                  ),
-                  onChanged: (v) {
-                    name = v;
-                  },
-                ),
-               const  SizedBox(height: 16,),
-                TextField(
-                  focusNode: focusNode,
-                  textInputAction: TextInputAction.done,
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: [
-                    MaskTextInputFormatter(
-                        mask: '(##) ### ## ##',
-                        filter: {"#": RegExp(r'[0-9]')},
-                        type: MaskAutoCompletionType.lazy)
-                  ],
-                  decoration:  InputDecoration(hintText: 'Phone Number',
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.grey, width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.grey, width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.red, width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    border: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.grey, width: 1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-
-                  ),
-                  onChanged: (v) {
-                    if(v.length == 14){
-                      focusNode.unfocus();
-                    }
-                    phone = v;
-                  },
-                ),
-                TextButton(onPressed: (){
-                  showBottomSheetDialog();
-                }, child: Text('Select Image')),
-                TextButton(
-                    onPressed: () {
-                      context.read<ContactBloc>().add(AddContactEvent(
-                          contactModel: ContactModel(
-                              phone: phone,
-                              name: name,
-                              contactId: '',
-                              creationDate:
-                                  DateTime.now().millisecondsSinceEpoch, image: image)));
+                    onChanged: (v) {
+                      email = v;
                     },
-                    child: const Center(child: Text('Add')))
-              ],
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  TextField(
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                      hintText: 'Enter Name',
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.red, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onChanged: (v) {
+                      name = v;
+                    },
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  TextField(
+                    focusNode: focusNode,
+                    textInputAction: TextInputAction.done,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      MaskTextInputFormatter(
+                          mask: '(##) ### ## ##',
+                          filter: {"#": RegExp(r'[0-9]')},
+                          type: MaskAutoCompletionType.lazy)
+                    ],
+                    decoration: InputDecoration(
+                      hintText: 'Phone Number',
+                      enabledBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.red, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onChanged: (v) {
+                      if (v.length == 14) {
+                        focusNode.unfocus();
+                      }
+                      phone = v;
+                    },
+                  ),
+                  TextButton(
+                      onPressed: () {
+                        showBottomSheetDialog();
+                      },
+                      child: const Text('Select Image')),
+                  TextButton(
+                      onPressed: () {
+                        if (phone.isNotEmpty &&
+                            image.isNotEmpty &&
+                            email.isNotEmpty &&
+                            name.isNotEmpty) {
+                          context.read<ContactBloc>().add(AddContactEvent(
+                              contactModel: ContactModel(
+                                  phone: phone,
+                                  name: name,
+                                  email: email,
+                                  contactId: '',
+                                  creationDate:
+                                      DateTime.now().millisecondsSinceEpoch,
+                                  image: image)));
+                        } else {
+                          showErrorMessage(
+                              message: 'Maydonlar toliq emas', context: context);
+                        }
+                      },
+                      child: const Center(child: Text('Add')))
+                ],
+              ),
             ),
           );
         },
@@ -157,10 +226,8 @@ class _AddContactPageState extends State<AddContactPage> {
     } catch (error) {
       debugPrint('STORAGE ISHLAMADI');
       return UniversalData(error: error.toString());
-    }}
-
-
-
+    }
+  }
 
   void showBottomSheetDialog() {
     showModalBottomSheet(
@@ -171,7 +238,7 @@ class _AddContactPageState extends State<AddContactPage> {
           padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
             color: Color(0xFF674D3F),
-            borderRadius:  BorderRadius.only(
+            borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16),
               topRight: Radius.circular(16),
             ),
@@ -184,16 +251,34 @@ class _AddContactPageState extends State<AddContactPage> {
                   _getFromGallery();
                   Navigator.pop(context);
                 },
-                leading:  const Icon(Icons.photo,color: Colors.white,),
-                title:  const Text("Select from Gallery",style: TextStyle(color: Colors.white,fontSize: 16,fontFamily: 'Urbanist'),),
+                leading: const Icon(
+                  Icons.photo,
+                  color: Colors.white,
+                ),
+                title: const Text(
+                  "Select from Gallery",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontFamily: 'Urbanist'),
+                ),
               ),
               ListTile(
                 onTap: () {
                   _getFromCamera();
                   Navigator.pop(context);
                 },
-                leading:  const Icon(Icons.camera_alt,color: Colors.white,),
-                title:  const Text("Select from Camera",style: TextStyle(color: Colors.white,fontSize: 16,fontFamily: 'Urbanist'),),
+                leading: const Icon(
+                  Icons.camera_alt,
+                  color: Colors.white,
+                ),
+                title: const Text(
+                  "Select from Camera",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontFamily: 'Urbanist'),
+                ),
               )
             ],
           ),
@@ -212,9 +297,7 @@ class _AddContactPageState extends State<AddContactPage> {
       showLoading(context: context);
       UniversalData data = await imageUploader(xFiles);
       image = data.data;
-      setState(() {
-
-      });
+      setState(() {});
       if (context.mounted) {
         hideLoading(context: context);
       }
@@ -233,9 +316,7 @@ class _AddContactPageState extends State<AddContactPage> {
       showLoading(context: context);
       UniversalData data = await imageUploader(xFiles);
       image = data.data;
-      setState(() {
-
-      });
+      setState(() {});
       if (context.mounted) {
         hideLoading(context: context);
       }
@@ -243,5 +324,4 @@ class _AddContactPageState extends State<AddContactPage> {
       hideLoading(context: context);
     }
   }
-
 }

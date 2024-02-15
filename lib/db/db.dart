@@ -1,50 +1,3 @@
-// import 'package:contact/features/contact/models/contact_model.dart';
-// import 'package:sqflite/sqflite.dart';
-// import 'package:path/path.dart';
-//
-//
-// class DatabaseHelper {
-//   late Database _database;
-//
-//   Future<void> initializeDatabase() async {
-//     String path = join(await getDatabasesPath(), 'contact.db');
-//     _database = await openDatabase(path, version: 1, onCreate: _createDb);
-//   }
-//
-//   Future<void> _createDb(Database db, int version) async {
-//     await db.execute('''
-//       CREATE TABLE contacts (
-//         id INTEGER PRIMARY KEY,
-//         name TEXT,
-//         contactId TEXT,
-//         phone TEXT,
-//         creationDate INTEGER
-//       )
-//     ''');
-//   }
-//
-//   Future<int> insertContact(ContactModel contact) async {
-//     return await _database.insert('contacts', contact.toJson());
-//   }
-//
-//   Future<List<ContactModel>> fetchAllContacts() async {
-//     final List<Map<String, dynamic>> maps = await _database.query('contacts');
-//     return List.generate(maps.length, (i) {
-//       return ContactModel(
-//         id: maps[i]['id'],
-//         name: maps[i]['name'],
-//         creationDate: maps[i]['creationDate'], phone: maps[i]['phone'], contactId: maps[i]['contactId'],
-//       );
-//     });
-//   }
-//
-//   Future<void> deleteExpiredContacts() async {
-//     int currentTime = DateTime.now().millisecondsSinceEpoch;
-//     await _database.delete('contacts', where: 'creationDate <= ?', whereArgs: [currentTime - 30 * 24 * 60 * 60 * 1000]);
-//   }
-// }
-
-
 import 'package:contact/features/contact/models/contact_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
@@ -86,6 +39,8 @@ class LocalDatabase {
     CREATE TABLE ${ContactModelFields.tableName} (
     ${ContactModelFields.id} $idType,
     ${ContactModelFields.name} $textType,
+    ${ContactModelFields.image} $textType,
+    ${ContactModelFields.email} $textType,
     ${ContactModelFields.phone} $textType,
     ${ContactModelFields.creationDate} $intType
     )
